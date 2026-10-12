@@ -10,6 +10,9 @@
 /// [`hyper::trace`]: https://github.com/hyperium/hyper/blob/master/src/trace.rs
 #[macro_use]
 mod trace {
+    #[cfg(not(feature = "tracing"))]
+    pub(crate) struct DisabledGuard {}
+
     macro_rules! info {
         ($($arg:tt)*) => {
             #[cfg(feature = "tracing")]
@@ -36,6 +39,10 @@ mod trace {
                     let _span = tracing::trace_span!($($arg)+);
                     _span.entered()
                 }
+                #[cfg(not(feature = "tracing"))]
+                {
+                    crate::trace::DisabledGuard {}
+                }
             }
         }
     }
@@ -49,7 +56,6 @@ fn main() {
 
     // Log an event before and after entering a span.
     info!("before entering span");
-    #[cfg_attr(not(feature = "tracing"), allow(clippy::let_unit_value))]
     let _entered = trace_span!("instrumented");
     info!("after entering span");
 
