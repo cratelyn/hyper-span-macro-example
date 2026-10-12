@@ -49,6 +49,7 @@ fn main() {
 
     // Log an event before and after entering a span.
     info!("before entering span");
+    #[cfg_attr(not(feature = "tracing"), allow(clippy::let_unit_value))]
     let _entered = trace_span!("instrumented");
     info!("after entering span");
 
